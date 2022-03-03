@@ -1,26 +1,38 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { LanguageClient, LanguageClientOptions, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
+let client: LanguageClient;
+
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "ruby-lsp" is now active!');
+	const server = {
+		command: "bundle",
+		args: ["exec", "ruby-lsp"],
+		options: {
+			cwd: vscode.workspace.workspaceFolders![0].uri.fsPath
+		},
+		transport: TransportKind.stdio
+	};
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('ruby-lsp.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from ruby-lsp!');
-	});
+	const serverOptions: ServerOptions = {
+		run: server,
+		debug: server
+	};
 
-	context.subscriptions.push(disposable);
+	const clientOptions: LanguageClientOptions = {
+		documentSelector: [{ scheme: 'file', language: 'ruby' }],
+		synchronize: {
+			fileEvents: vscode.workspace.createFileSystemWatcher('**/*.rb')
+		}
+	};
+
+	client = new LanguageClient('Shopify.ruby-lsp', 'Ruby LSP', serverOptions, clientOptions);
+	client.start();
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	if (!client) {
+		return undefined;
+	}
+	return client.stop();
+}
