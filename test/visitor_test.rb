@@ -17,7 +17,7 @@ class VisitorTest < Minitest::Test
   end
 
   def test_visit_tree
-    parsed_tree = RubyLsp::Store::ParsedTree.new(<<~RUBY)
+    document = RubyLsp::Document.new(<<~RUBY)
       class Foo
         def foo; end
 
@@ -30,7 +30,7 @@ class VisitorTest < Minitest::Test
     RUBY
 
     visitor = DummyVisitor.new
-    visitor.visit(parsed_tree.tree)
+    visitor.visit(document.tree)
     assert_equal(["Foo", "foo", "Bar", "bar", "baz"], visitor.visited_nodes)
   end
 

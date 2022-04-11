@@ -42,7 +42,7 @@ module RubyLsp
         end
       end
 
-      def initialize(parsed_tree)
+      def initialize(document)
         super
 
         @root = SymbolHierarchyRoot.new
@@ -50,7 +50,7 @@ module RubyLsp
       end
 
       def run
-        visit(@parsed_tree.tree)
+        visit(@document.tree)
         @root.children
       end
 
@@ -192,7 +192,7 @@ module RubyLsp
 
       # TODO: clean this once SyntaxTree provides the relative positions
       def range_from_syntax_tree_node(node)
-        parser = @parsed_tree.parser
+        parser = @document.parser
         loc = node.location
 
         start_line = parser.line_counts[loc.start_line - 1]
