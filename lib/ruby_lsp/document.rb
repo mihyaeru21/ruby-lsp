@@ -11,10 +11,19 @@ module RubyLsp
       @tree = @parser.parse
       @cache = {}
       @source = source
+      @parsable_source = source
     end
 
     def ==(other)
       @source == other.source
+    end
+
+    def reset(source)
+      @parser = SyntaxTree::Parser.new(source)
+      @tree = @parser.parse
+      @source = source
+      @parsable_source = source.dup
+      @cache.clear
     end
 
     def cache_fetch(request_name)
@@ -36,9 +45,22 @@ module RubyLsp
         @source[start_position...end_position] = edit[:text]
       end
 
-      @parser = SyntaxTree::Parser.new(source)
-      @tree = @parser.parse
       @cache.clear
+      @parser = SyntaxTree::Parser.new(@source)
+      @tree = @parser.parse
+      @parsable_source = @source.dup
+    rescue SyntaxTree::Parser::ParseError
+      edits.each do |edit|
+        range = edit[:range]
+        scanner = Scanner.new(@parsable_source)
+        start_position = scanner.find_position(range[:start])
+        end_position = scanner.find_position(range[:end])
+
+        @parsable_source[start_position...end_position] = edit[:text].split("").select { |c| c == "\n" }.join
+      end
+
+      @parser = SyntaxTree::Parser.new(@parsable_source)
+      @tree = @parser.parse
     end
 
     class Scanner
@@ -56,9 +78,7 @@ module RubyLsp
           @current_line += 1
         end
 
-        # The position is: the length of the match until the last line break + the requested character position + the
-        # current line to account for line break characters
-        (@scanner.pre_match&.length || 0) + position[:character] + @current_line
+        @scanner.pos + position[:character]
       end
     end
   end
