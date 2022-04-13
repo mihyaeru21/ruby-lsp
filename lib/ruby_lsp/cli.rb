@@ -17,9 +17,28 @@ module RubyLsp
 
         on("textDocument/didChange") do |request|
           uri = request.dig(:params, :textDocument, :uri)
-          store.push_edits(uri, request.dig(:params, :contentChanges))
+          syntax_errors = store.push_edits(uri, request.dig(:params, :contentChanges))
 
-          send_diagnostics(uri)
+          if syntax_errors.nil?
+            send_diagnostics(uri)
+          else
+            @writer.write(
+              method: "textDocument/publishDiagnostics",
+              params: LanguageServer::Protocol::Interface::PublishDiagnosticsParams.new(
+                uri: uri,
+                diagnostics: syntax_errors.map do |edit|
+                  LanguageServer::Protocol::Interface::Diagnostic.new(
+                    message: "Syntax error",
+                    source: "SyntaxTree",
+                    code: "Syntax error",
+                    severity: LanguageServer::Protocol::Constant::DiagnosticSeverity::ERROR,
+                    range: edit[:range]
+                  )
+                end
+              )
+            )
+          end
+
           nil
         end
 

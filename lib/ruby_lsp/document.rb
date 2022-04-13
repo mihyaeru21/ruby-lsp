@@ -49,6 +49,7 @@ module RubyLsp
       @parser = SyntaxTree::Parser.new(@source)
       @tree = @parser.parse
       @parsable_source = @source.dup
+      nil
     rescue SyntaxTree::Parser::ParseError
       edits.each do |edit|
         range = edit[:range]
@@ -56,11 +57,14 @@ module RubyLsp
         start_position = scanner.find_position(range[:start])
         end_position = scanner.find_position(range[:end])
 
-        @parsable_source[start_position...end_position] = edit[:text].split("").select { |c| c == "\n" }.join
+        next if edit[:text].empty?
+
+        @parsable_source[start_position...end_position] = edit[:text].gsub(/[^\n]/, "")
       end
 
       @parser = SyntaxTree::Parser.new(@parsable_source)
       @tree = @parser.parse
+      edits
     end
 
     class Scanner
