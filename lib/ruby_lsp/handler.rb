@@ -21,6 +21,7 @@ module RubyLsp
     def start
       $stderr.puts "Starting Ruby LSP..."
       @reader.read do |request|
+        $stderr.puts "Received request: #{request.inspect}"
         handle(request)
       end
     end
