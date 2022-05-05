@@ -25,6 +25,8 @@ module RubyLsp
         @text = document.source
         @uri = uri
 
+        Parser::Base.define_method(:do_parse) { document.ast_tree }
+
         super(
           ::RuboCop::Options.new.parse(rubocop_flags).first,
           ::RuboCop::ConfigStore.new
@@ -41,9 +43,27 @@ module RubyLsp
 
       private
 
+      # def get_processed_source(file)
+      #   FakeProcessedSource.new(@document, file)
+      # end
+
       def rubocop_flags
         COMMON_RUBOCOP_FLAGS
       end
+
+      # class FakeProcessedSource < RuboCop::AST::ProcessedSource
+      #   def initialize(document, path) # rubocop:disable Lint/MissingSuper
+      #     @raw_source = document.source
+      #     @diagnostics = []
+      #     @ruby_version = RUBY_VERSION
+      #     @parser_error = nil
+      #     @ast = document.ast_tree
+      #     @path = path
+      #     @comments = []
+      #     @tokens = []
+      #     @buffer = document.ast_buffer
+      #   end
+      # end
     end
   end
 end

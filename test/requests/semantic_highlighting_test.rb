@@ -222,7 +222,7 @@ class SemanticHighlightingTest < Minitest::Test
   private
 
   def assert_tokens(expected, source_code)
-    document = RubyLsp::Document.new(source_code)
+    document = RubyLsp::Document.new(source_code, "file://#{__FILE__}")
     assert_equal(
       inline_tokens(expected),
       RubyLsp::Requests::SemanticHighlighting.run(document).data

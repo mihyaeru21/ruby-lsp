@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency("language_server-protocol")
   s.add_dependency("rubocop", ">= 1.0")
   s.add_dependency("syntax_tree", ">= 2.3")
+  s.add_dependency("syntax_tree-translator", ">= 0.1.0")
 end

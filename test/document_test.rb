@@ -4,7 +4,7 @@ require "test_helper"
 
 class DocumentTest < Minitest::Test
   def test_valid_incremental_edits
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       def foo
       end
     RUBY
@@ -28,7 +28,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_full_node
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       def foo
         puts 'a' # comment
       end
@@ -45,7 +45,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_deletion_single_character
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       def foo
         puts 'a'
       end
@@ -62,7 +62,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_add_delete_single_character
-    document = RubyLsp::Document.new(+"")
+    document = RubyLsp::Document.new(+"", "foo.rb")
 
     # Add a
     document.push_edits([{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }, text: "a" }])
@@ -76,7 +76,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_replace
-    document = RubyLsp::Document.new(+"puts 'a'")
+    document = RubyLsp::Document.new(+"puts 'a'", "foo.rb")
 
     # Replace for puts 'b'
     document.push_edits([{ range: { start: { line: 0, character: 0 }, end: { line: 0, character: 8 } },
@@ -86,7 +86,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_new_line_and_char_addition
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       # frozen_string_literal: true
 
       class Foo
@@ -113,7 +113,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_multi_cursor_edit
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       # frozen_string_literal: true
 
 
@@ -179,7 +179,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_syntax_error_on_addition_returns_diagnostics
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       # frozen_string_literal: true
 
       a
@@ -202,7 +202,7 @@ class DocumentTest < Minitest::Test
   end
 
   def test_syntax_error_on_removal_returns_diagnostics
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "foo.rb")
       # frozen_string_literal: true
 
       class Foo

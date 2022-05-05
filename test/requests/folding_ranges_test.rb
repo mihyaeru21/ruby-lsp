@@ -499,13 +499,13 @@ class FoldingRangesTest < Minitest::Test
   private
 
   def assert_no_folding(source)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source, "file://#{__FILE__}")
     actual = RubyLsp::Requests::FoldingRanges.run(document)
     assert_empty(JSON.parse(actual.to_json, symbolize_names: true))
   end
 
   def assert_ranges(source, expected_ranges)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source, "file://#{__FILE__}")
     actual = RubyLsp::Requests::FoldingRanges.run(document)
     assert_equal(expected_ranges, JSON.parse(actual.to_json, symbolize_names: true))
   end

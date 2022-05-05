@@ -5,6 +5,7 @@ PATH
       language_server-protocol
       rubocop (>= 1.0)
       syntax_tree (>= 2.3)
+      syntax_tree-translator (>= 0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -52,7 +53,15 @@ GEM
     rubocop-shopify (2.5.0)
       rubocop (~> 1.25)
     ruby-progressbar (1.11.0)
+    ruby_parser (3.19.1)
+      sexp_processor (~> 4.16)
+    sexp_processor (4.16.1)
     syntax_tree (2.3.1)
+    syntax_tree-translator (0.1.0)
+      parser
+      rubocop-ast
+      ruby_parser
+      syntax_tree
     unicode-display_width (2.1.0)
     webrick (1.7.0)
     yard (0.9.27)

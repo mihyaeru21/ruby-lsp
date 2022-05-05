@@ -24,7 +24,7 @@ class FormattingTest < Minitest::Test
   private
 
   def assert_formatted(original, formatted)
-    document = RubyLsp::Document.new(original)
+    document = RubyLsp::Document.new(original, "file://#{__FILE__}")
     result = nil
 
     stdout, _ = capture_io do

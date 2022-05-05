@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 require "strscan"
+require "syntax_tree/translator"
 
 module RubyLsp
   class Document
-    attr_reader :tree, :source, :syntax_error_edits
+    attr_reader :tree, :ast_tree, :ast_buffer, :source, :syntax_error_edits
 
-    def initialize(source)
-      @tree = SyntaxTree.parse(source)
+    def initialize(source, uri)
+      @uri = uri
+      parse(source)
       @cache = {}
       @syntax_error_edits = []
       @source = source
@@ -19,7 +21,7 @@ module RubyLsp
     end
 
     def reset(source)
-      @tree = SyntaxTree.parse(source)
+      parse(source)
       @source = source
       @parsable_source = source.dup
       @cache.clear
@@ -40,7 +42,7 @@ module RubyLsp
       edits.each { |edit| apply_edit(@source, edit[:range], edit[:text]) }
 
       @cache.clear
-      @tree = SyntaxTree.parse(@source)
+      parse(@source)
       @syntax_error_edits.clear
       @parsable_source = @source.dup
       nil
@@ -64,9 +66,19 @@ module RubyLsp
         apply_edit(@parsable_source, edit[:range], edit[:text].gsub(/[^\r\n]/, " "))
       end
 
-      @tree = SyntaxTree.parse(@parsable_source)
+      parse(@parsable_source)
     rescue SyntaxTree::Parser::ParseError
       # If we can't parse the source even after emptying the edits, then just fallback to the previous source
+    end
+
+    def parse(source)
+      @tree = SyntaxTree.parse(source)
+      buffer = Parser::Source::Buffer.new(@uri.delete_prefix("file://"))
+      buffer.source = source
+      @ast_buffer = buffer
+
+      visitor = SyntaxTree::Translator::RuboCop.new(buffer)
+      @ast_tree = visitor.visit(@tree)
     end
 
     def apply_edit(source, range, text)

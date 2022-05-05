@@ -9,7 +9,7 @@ class StoreTest < Minitest::Test
   end
 
   def test_get
-    assert_equal(RubyLsp::Document.new("def foo; end"), @store.get("/foo/bar.rb"))
+    assert_equal(RubyLsp::Document.new("def foo; end", "/foo/bar.rb"), @store.get("/foo/bar.rb"))
   end
 
   def test_reads_from_file_if_missing_in_store
@@ -17,7 +17,7 @@ class StoreTest < Minitest::Test
     file.write("def great_code; end")
     file.rewind
 
-    assert_equal(RubyLsp::Document.new("def great_code; end"), @store.get(file.path))
+    assert_equal(RubyLsp::Document.new("def great_code; end", file.path), @store.get(file.path))
   ensure
     file.close
     file.unlink
@@ -26,7 +26,7 @@ class StoreTest < Minitest::Test
   def test_store_ignores_syntax_errors
     @store.set("/foo/bar.rb", "def bar; end; end")
 
-    assert_equal(RubyLsp::Document.new("def foo; end"), @store.get("/foo/bar.rb"))
+    assert_equal(RubyLsp::Document.new("def foo; end", "/foo/bar.rb"), @store.get("/foo/bar.rb"))
   end
 
   def test_clear
@@ -90,6 +90,6 @@ class StoreTest < Minitest::Test
     @store.push_edits(uri,
       [{ range: { start: { line: 0, character: 17 }, end: { line: 0, character: 17 } }, text: ";" }])
 
-    assert_equal(RubyLsp::Document.new("def bar; puts 'a'; end"), @store.get(uri))
+    assert_equal(RubyLsp::Document.new("def bar; puts 'a'; end", uri), @store.get(uri))
   end
 end

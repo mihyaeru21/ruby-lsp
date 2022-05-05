@@ -29,7 +29,7 @@ class CodeActionsTest < Minitest::Test
   private
 
   def assert_code_actions(source, code_actions, range)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source, "file://#{__FILE__}")
     result = nil
 
     stdout, _ = capture_io do

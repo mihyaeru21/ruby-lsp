@@ -22,7 +22,7 @@ class DiagnosticsTest < Minitest::Test
   end
 
   def test_syntax_error_diagnostics
-    document = RubyLsp::Document.new(+<<~RUBY)
+    document = RubyLsp::Document.new(+<<~RUBY, "file://#{__FILE__}")
       class Foo
       end
     RUBY
@@ -41,7 +41,7 @@ class DiagnosticsTest < Minitest::Test
   private
 
   def assert_diagnostics(source, diagnostics)
-    document = RubyLsp::Document.new(source)
+    document = RubyLsp::Document.new(source, "file://#{__FILE__}")
     result = nil
 
     stdout, _ = capture_io do

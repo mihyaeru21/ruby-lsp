@@ -19,7 +19,7 @@ module RubyLsp
     end
 
     def set(uri, content)
-      @state[uri] = Document.new(content)
+      @state[uri] = Document.new(content, uri)
     rescue SyntaxTree::Parser::ParseError
       # Do not update the store if there are syntax errors
     end
