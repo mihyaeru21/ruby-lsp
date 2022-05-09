@@ -3,6 +3,34 @@
 require "rubocop"
 require "cgi"
 
+module SyntaxTree
+  module Translator
+    class Parser < Visitor
+      def visit_regexp_literal(node)
+        children = visit_all(node.parts)
+
+        range = ::Parser::Source::Range.new(buffer, node.location.start_char, node.location.end_char)
+        location = ::Parser::Source::Map.new(range)
+
+
+        children << s(:regopt, node.ending.scan(/[a-z]/).sort.map(&:to_sym), location: location)
+
+        regexp = s(:regexp, children, location: location)
+
+        if stack[-2] in If[predicate: ^(node)] | Unless[predicate: ^(node)]
+          s(:match_current_line, [regexp])
+        elsif stack[-3] in If[predicate: Unary[statement: ^(node), operator: "!"]] | Unless[predicate: Unary[statement: ^(node), operator: "!"]]
+          s(:match_current_line, [regexp])
+        elsif stack[-4] in Program[statements: { body: [*, Unary[statement: ^(node), operator: "!"]] }]
+          s(:match_current_line, [regexp])
+        else
+          regexp
+        end
+      end
+    end
+  end
+end
+
 module RubyLsp
   module Requests
     # :nodoc:
@@ -43,27 +71,9 @@ module RubyLsp
 
       private
 
-      # def get_processed_source(file)
-      #   FakeProcessedSource.new(@document, file)
-      # end
-
       def rubocop_flags
         COMMON_RUBOCOP_FLAGS
       end
-
-      # class FakeProcessedSource < RuboCop::AST::ProcessedSource
-      #   def initialize(document, path) # rubocop:disable Lint/MissingSuper
-      #     @raw_source = document.source
-      #     @diagnostics = []
-      #     @ruby_version = RUBY_VERSION
-      #     @parser_error = nil
-      #     @ast = document.ast_tree
-      #     @path = path
-      #     @comments = []
-      #     @tokens = []
-      #     @buffer = document.ast_buffer
-      #   end
-      # end
     end
   end
 end
