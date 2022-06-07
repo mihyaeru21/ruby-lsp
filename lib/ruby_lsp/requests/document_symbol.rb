@@ -26,9 +26,6 @@ module RubyLsp
     # ```
     class DocumentSymbol < BaseRequest
       extend T::Sig
-      extend T::Generic
-
-      Response = type_template { { fixed: T::Array[LanguageServer::Protocol::Interface::DocumentSymbol] } }
 
       SYMBOL_KIND = T.let({
         file: 1,
@@ -71,6 +68,11 @@ module RubyLsp
         def initialize
           @children = T.let([], T::Array[LanguageServer::Protocol::Interface::DocumentSymbol])
         end
+      end
+
+      sig { params(document: Document).returns(T::Array[LanguageServer::Protocol::Interface::DocumentSymbol]) }
+      def self.run(document)
+        new(document).run
       end
 
       sig { params(document: Document).void }

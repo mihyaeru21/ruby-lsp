@@ -41,7 +41,7 @@ module RubyLsp
         @range = range
       end
 
-      sig { returns(T::Array[LanguageServer::Protocol::Interface::CodeAction]) }
+      sig { override.returns(T::Array[LanguageServer::Protocol::Interface::CodeAction]) }
       def run
         diagnostics = Diagnostics.run(@uri, @document)
         corrections = diagnostics.select do |diagnostic|

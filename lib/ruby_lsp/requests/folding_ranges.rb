@@ -14,9 +14,6 @@ module RubyLsp
     # ```
     class FoldingRanges < BaseRequest
       extend T::Sig
-      extend T::Generic
-
-      Response = type_template { { fixed: T::Array[LanguageServer::Protocol::Interface::FoldingRange] } }
 
       SIMPLE_FOLDABLES = T.let([
         SyntaxTree::ArrayLiteral,
@@ -55,6 +52,11 @@ module RubyLsp
           SyntaxTree::Rescue,
           SyntaxTree::When,
         )
+      end
+
+      sig { params(document: Document).returns(T::Array[LanguageServer::Protocol::Interface::FoldingRange]) }
+      def self.run(document)
+        new(document).run
       end
 
       sig { params(document: Document).void }

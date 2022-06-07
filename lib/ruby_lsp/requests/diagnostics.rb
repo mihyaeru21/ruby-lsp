@@ -16,15 +16,16 @@ module RubyLsp
     # ```
     class Diagnostics < RuboCopRequest
       extend T::Sig
-      extend T::Generic
 
-      Response = type_template do
-        {
-          fixed: T.any(
-            T::Array[Support::RuboCopDiagnostic],
-            T::Array[Support::SyntaxErrorDiagnostic],
-          ),
-        }
+      sig do
+        params(uri: String, document: Document)
+        .returns(T.any(
+          T::Array[Support::RuboCopDiagnostic],
+          T::Array[Support::SyntaxErrorDiagnostic]
+        ))
+      end
+      def self.run(uri, document)
+        new(uri, document).run
       end
 
       sig do
