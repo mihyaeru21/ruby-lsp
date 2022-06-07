@@ -3,7 +3,6 @@ PATH
   specs:
     ruby-lsp (0.0.3)
       language_server-protocol
-      rubocop (>= 1.0)
       sorbet-runtime
       syntax_tree (>= 2.3)
 
@@ -111,6 +110,7 @@ DEPENDENCIES
   minitest (~> 5.15)
   minitest-reporters (~> 1.5)
   rake (~> 13.0)
+  rubocop (~> 1.30)
   rubocop-minitest (~> 0.20.0)
   rubocop-rake (~> 0.6.0)
   rubocop-shopify (~> 2.7)
