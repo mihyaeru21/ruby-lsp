@@ -9,7 +9,7 @@ class DiagnosticsExpectationsTest < ExpectationsTestRunner
 
   def run_expectations(source)
     document = RubyLsp::Document.new(source)
-    RubyLsp::Requests::Diagnostics.new("file://#{__FILE__}", document).run
+    RubyLsp::Requests::Diagnostics.singleton.run("file://#{__FILE__}", document)
   end
 
   def assert_expectations(source, expected)

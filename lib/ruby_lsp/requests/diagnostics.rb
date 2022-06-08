@@ -17,16 +17,28 @@ module RubyLsp
     class Diagnostics < RuboCopRequest
       extend T::Sig
 
+      class << self
+        extend T::Sig
+
+        sig { returns(Diagnostics) }
+        def singleton
+          @singleton = T.let(nil, T.nilable(Diagnostics))
+          return @singleton if @singleton
+
+          @singleton = Diagnostics.new
+        end
+      end
+
       sig do
-        override.returns(
+        override.params(uri: String, document: Document).returns(
           T.any(
             T.all(T::Array[Support::RuboCopDiagnostic], Object),
             T.all(T::Array[Support::SyntaxErrorDiagnostic], Object),
           )
         )
       end
-      def run
-        return syntax_error_diagnostics if @document.syntax_errors?
+      def run(uri, document)
+        return document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) } if document.syntax_errors?
 
         super
 
@@ -35,14 +47,7 @@ module RubyLsp
 
       sig { params(_file: String, offenses: T::Array[RuboCop::Cop::Offense]).void }
       def file_finished(_file, offenses)
-        @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, @uri) }
-      end
-
-      private
-
-      sig { returns(T::Array[Support::SyntaxErrorDiagnostic]) }
-      def syntax_error_diagnostics
-        @document.syntax_error_edits.map { |e| Support::SyntaxErrorDiagnostic.new(e) }
+        @diagnostics = offenses.map { |offense| Support::RuboCopDiagnostic.new(offense, T.must(@uri)) }
       end
     end
   end

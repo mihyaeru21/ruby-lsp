@@ -33,7 +33,7 @@ module RubyLsp
 
       sig { override.returns(T.all(T::Array[LanguageServer::Protocol::Interface::CodeAction], Object)) }
       def run
-        diagnostics = Diagnostics.new(@uri, @document).run
+        diagnostics = Diagnostics.singleton.run(@uri, @document)
         corrections = diagnostics.select do |diagnostic|
           diagnostic.correctable? && T.cast(diagnostic, Support::RuboCopDiagnostic).in_range?(@range)
         end

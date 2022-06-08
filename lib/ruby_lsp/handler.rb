@@ -159,13 +159,13 @@ module RubyLsp
 
     sig { params(uri: String).returns(T.nilable(T::Array[LanguageServer::Protocol::Interface::TextEdit])) }
     def respond_with_formatting(uri)
-      Requests::Formatting.new(uri, store.get(uri)).run
+      Requests::Formatting.singleton.run(uri, store.get(uri))
     end
 
     sig { params(uri: String).void }
     def send_diagnostics(uri)
       response = store.cache_fetch(uri, :diagnostics) do |document|
-        Requests::Diagnostics.new(uri, document).run
+        Requests::Diagnostics.singleton.run(uri, document)
       end
 
       @writer.write(

@@ -19,19 +19,14 @@ module RubyLsp
         "RuboCop::Formatter::BaseFormatter", # Suppress any output by using the base formatter
       ].freeze, T::Array[String])
 
-      sig { returns(String) }
-      attr_reader :file
-
-      sig { returns(String) }
+      sig { returns(T.nilable(String)) }
       attr_reader :text
 
-      sig { params(uri: String, document: Document).void }
-      def initialize(uri, document)
-        @file = T.let(CGI.unescape(URI.parse(uri).path), String)
-        @document = document
-        @text = T.let(document.source, String)
-        @uri = uri
-        @options = T.let({}, T::Hash[Symbol, T.untyped])
+      sig { void }
+      def initialize
+        @uri = T.let(nil, T.nilable(String))
+        @text = T.let(nil, T.nilable(String))
+        @options = T.let({}, T::Hash[Symbol, Object])
         @diagnostics = T.let([], T::Array[Support::RuboCopDiagnostic])
 
         super(
@@ -40,8 +35,12 @@ module RubyLsp
         )
       end
 
-      sig { overridable.returns(Object) }
-      def run
+      sig { overridable.params(uri: String, document: Document).returns(Object) }
+      def run(uri, document)
+        @uri = uri
+        @text = document.source
+
+        file = CGI.unescape(URI.parse(uri).path)
         # We communicate with Rubocop via stdin
         @options[:stdin] = text
 

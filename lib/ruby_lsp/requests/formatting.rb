@@ -19,29 +19,42 @@ module RubyLsp
 
       RUBOCOP_FLAGS = T.let((COMMON_RUBOCOP_FLAGS + ["--autocorrect"]).freeze, T::Array[String])
 
-      sig { params(uri: String, document: Document).void }
-      def initialize(uri, document)
-        super
-        @formatted_text = T.let(nil, T.nilable(String))
+      class << self
+        extend T::Sig
+
+        sig { returns(Formatting) }
+        def singleton
+          @singleton = T.let(nil, T.nilable(Formatting))
+          return @singleton if @singleton
+
+          @singleton = Formatting.new
+        end
       end
 
-      sig { override.returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object))) }
-      def run
+      sig do
+        override.params(
+          uri: String,
+          document: Document
+        ).returns(T.nilable(T.all(T::Array[LanguageServer::Protocol::Interface::TextEdit], Object)))
+      end
+      def run(uri, document)
         super
 
-        @formatted_text = @options[:stdin] # Rubocop applies the corrections on stdin
-        return unless @formatted_text
+        formatted_text = @options[:stdin] # Rubocop applies the corrections on stdin
+        return unless formatted_text
+
+        size = T.must(text).size
 
         [
           LanguageServer::Protocol::Interface::TextEdit.new(
             range: LanguageServer::Protocol::Interface::Range.new(
               start: LanguageServer::Protocol::Interface::Position.new(line: 0, character: 0),
               end: LanguageServer::Protocol::Interface::Position.new(
-                line: text.size,
-                character: text.size
+                line: size,
+                character: size
               )
             ),
-            new_text: @formatted_text
+            new_text: formatted_text
           ),
         ]
       end
